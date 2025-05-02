@@ -1,0 +1,44 @@
+services:
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: secret           # root password
+      MYSQL_DATABASE: figurines             # creates this DB on startup
+      MYSQL_USER: appuser                   # non-root user
+      MYSQL_PASSWORD: apppass               # that user’s password
+    ports:
+      - '3307:3306'
+    volumes:
+      - db_data:/var/lib/mysql
+
+  graphql:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    command: npm run server
+    env_file: ./.env
+    depends_on:
+      - db
+    ports:
+      - '4000:4000'
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    command: npm run dev
+    depends_on:
+      - graphql
+    ports:
+      - '5173:5173'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+volumes:
+  db_data:

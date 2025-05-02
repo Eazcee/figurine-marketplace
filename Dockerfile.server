@@ -1,0 +1,23 @@
+# Dockerfile.server
+
+# 1. Same Node base
+FROM node:18-alpine
+
+# 2. Working dir
+WORKDIR /app
+
+# 3. Copy package manifests & install only server deps
+COPY package*.json ./
+RUN npm install
+
+# 4. Copy your GraphQL server entry
+COPY server.cjs ./
+
+# 5. (Optional) If you rely on an .env file for DB creds, copy it
+# COPY .env ./
+
+# 6. Expose your GraphQL port
+EXPOSE 4000
+
+# 7. Run the server script from package.json
+CMD ["npm", "run", "server"]

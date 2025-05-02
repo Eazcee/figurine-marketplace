@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useQuery, gql } from '@apollo/client';
 import ProductCard from './ProductCard';
 
-const GET_FIGURES = gql`
+export const GET_FIGURES = gql`
   query GetFigures {
     figures {
       id
@@ -15,16 +15,16 @@ const GET_FIGURES = gql`
   }
 `;
 
-export default function ProductList() {
+export default function ProductList({ onEdit, onAdd }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFigure, setSelectedFigure] = useState(null);
 
   const { loading, error, data } = useQuery(GET_FIGURES, {
-    fetchPolicy: 'network-only' // ensure fresh data on mount
+    fetchPolicy: 'network-only',
   });
 
-  if (loading) return <p className="p-6">Loading…</p>;
-  if (error)   return <p className="p-6 text-red-500">Error: {error.message}</p>;
+  if (loading) return <p className="p-6">Loading...</p>;
+  if (error) return <p className="p-6 text-red-500">Error: {error.message}</p>;
 
   const filtered = data.figures.filter(fig =>
     fig.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -43,26 +43,29 @@ export default function ProductList() {
         />
       </div>
 
-      {/* Product Grid */}
-      {/* No Results State */}
-{filtered.length === 0 ? (
-  <p className="p-6 text-center text-gray-500">
-    No figures found for &ldquo;{searchTerm}&rdquo;.
-  </p>
-) : (
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
-    {filtered.map(fig => (
-      <ProductCard
-        key={fig.id}
-        figure={fig}
-        onClick={() => setSelectedFigure(fig)}
-      />
-    ))}
-  </div>
-)}
+      {/* No Results / Grid */}
+      {filtered.length === 0 ? (
+        <p className="p-6 text-center text-gray-500">
+          No figures found for "{searchTerm}".
+        </p>
+      ) : (
+        <div className="
+            grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4
+            gap-6 p-6 justify-items-center items-center
+          ">
+          {filtered.map(fig => (
+            <ProductCard
+              key={fig.id}
+              figure={fig}
+              onClick={() => setSelectedFigure(fig)}
+              onEdit={onEdit}
+              onAdd={onAdd}
+            />
+          ))}
+        </div>
+      )}
 
-
-      {/* Modal */}
+      {/* Detail Modal */}
       {selectedFigure && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-lg max-w-lg w-full p-6 relative">
@@ -72,11 +75,13 @@ export default function ProductList() {
             >
               ✕
             </button>
-            <img
-              src={selectedFigure.image}
-              alt={selectedFigure.name}
-              className="w-full h-64 object-cover rounded-lg"
-            />
+            <div className="flex justify-center items-center mb-4 h-64 overflow-hidden bg-gray-100 rounded-lg">
+              <img
+                src={selectedFigure.image}
+                alt={selectedFigure.name}
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
             <h2 className="mt-4 text-2xl font-semibold">
               {selectedFigure.name}
             </h2>
