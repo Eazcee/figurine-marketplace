@@ -1,33 +1,18 @@
 // src/components/ProductList.jsx
 import React, { useState } from 'react';
-import { useQuery, gql } from '@apollo/client';
+import { useProducts } from '../hooks/useProducts';
 import ProductCard from './ProductCard';
-
-export const GET_FIGURES = gql`
-  query GetFigures {
-    figures {
-      id
-      name
-      price
-      image
-      series
-    }
-  }
-`;
 
 export default function ProductList({ onEdit, onAdd }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFigure, setSelectedFigure] = useState(null);
-
-  const { loading, error, data } = useQuery(GET_FIGURES, {
-    fetchPolicy: 'network-only',
-  });
+  const { products, loading, error } = useProducts();
 
   if (loading) return <p className="p-6">Loading...</p>;
-  if (error) return <p className="p-6 text-red-500">Error: {error.message}</p>;
+  if (error) return <p className="p-6 text-red-500">Error: {error}</p>;
 
-  const filtered = data.figures.filter(fig =>
-    fig.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = products.filter(fig =>
+    fig.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (

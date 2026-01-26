@@ -1,11 +1,19 @@
 // src/App.jsx
 import React, { useState } from 'react';
 import { useCart } from './context/CartContext';
+import { useAuth } from './context/AuthContext';
 import CartModal from './components/CartModal';
 import AddFigureForm from './components/AddFigureForm';
 import ProductList from './components/ProductList';
+import Login from './components/Login';
 
 export default function App() {
+  const { currentUser, signOut } = useAuth();
+
+  // If no user, show login page
+  if (!currentUser) {
+    return <Login />;
+  }
   // State for showing Add/Edit form modal
   const [showForm, setShowForm] = useState(false);
   const [editingFigure, setEditingFigure] = useState(null);
@@ -54,17 +62,24 @@ export default function App() {
       {/* Header with cart icon & badge */}
       <header className="relative bg-white shadow p-4 text-center text-2xl font-bold">
         Anime Figure Marketplace
-        <button
-          onClick={() => setShowCart(true)}
-          className="absolute top-4 right-4"
-        >
-          🛒
-          {totalItems > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              {totalItems}
-            </span>
-          )}
-        </button>
+        <div className="absolute top-4 right-4 flex items-center gap-4">
+          <button
+            onClick={signOut}
+            className="text-sm text-gray-600 hover:text-gray-800"
+          >
+            Sign Out
+          </button>
+          <button
+            onClick={() => setShowCart(true)}
+          >
+            🛒
+            {totalItems > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {totalItems}
+              </span>
+            )}
+          </button>
+        </div>
       </header>
 
       {/* Alert banner */}
